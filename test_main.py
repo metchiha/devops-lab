@@ -35,3 +35,11 @@ def test_version_returns_1_0_0():
     response = client.get("/version")
     assert response.status_code == 200
     assert response.json()["version"] == "1.0.0"
+
+
+# TEST 5 : This test is correct and should pass.
+def test_version_returns_development():
+    response = client.get("/version")
+    assert response.status_code == 200
+    assert response.json()["environment"] == "development"
+
