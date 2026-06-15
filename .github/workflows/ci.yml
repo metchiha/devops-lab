@@ -30,3 +30,7 @@ jobs:
       # Run the tests
       - name: Run tests
         run: uv run pytest -v
+        env:
+          APP_ENV: test
+
+        
