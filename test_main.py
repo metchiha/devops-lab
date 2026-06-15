@@ -27,4 +27,5 @@ def test_health_check_wrong_assertion():
     response = client.get("/health")
     assert response.status_code == 200
     # BUG: wrong expected value on purpose
-    assert response.json()["status"] == "broken"
+    #assert response.json()["status"] == "broken"
+    assert response.json()["status"] == "ok"
