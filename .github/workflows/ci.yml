@@ -27,6 +27,10 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      # Check code for style and quality issues
+      - name: Run flake8
+        run: uv run flake8 . --exclude=.venv
+
       # Run the tests
       - name: Run tests
         run: uv run pytest -v
