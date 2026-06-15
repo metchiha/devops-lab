@@ -42,4 +42,3 @@ def test_version_returns_development():
     response = client.get("/version")
     assert response.status_code == 200
     assert response.json()["environment"] == "development"
-
