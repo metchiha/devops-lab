@@ -37,3 +37,7 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "ok", "version": "1.0.0", "environment": APP_ENV}
+
+@app.get("/version")
+def version_specification():
+    return {"version": "1.0.0", "environment": "development"}

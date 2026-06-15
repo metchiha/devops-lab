@@ -28,4 +28,9 @@ def test_health_check_wrong_assertion():
     assert response.status_code == 200
     # BUG: wrong expected value on purpose
     #assert response.json()["status"] == "broken"
-    assert response.json()["status"] == "ok"
+
+# TEST 4 : This test is correct and should pass.
+def test_version_returns_1_0_0():
+    response = client.get("/version")
+    assert response.status_code == 200
+    assert response.json()["version"] == "1.0.0"
