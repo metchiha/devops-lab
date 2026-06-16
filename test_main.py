@@ -44,9 +44,10 @@ def test_version_returns_development():
     assert response.json()["environment"] == "development"
 
 
-# TEST 6 : This one has an intentional bug — you will catch it with CI in a moment:
+# TEST 6 : This one has an intentional bug.
 def test_about_endpoint():
     response = client.get("/about")
     assert response.status_code == 200
-    # BUG: wrong key name — the endpoint returns "name", not "title"
-    assert "title" in response.json()
+    # Fixed: the correct key is "name", not "title"
+    assert "name" in response.json()
+    assert response.json()["name"] == "DevOps Lab API"
