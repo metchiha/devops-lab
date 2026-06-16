@@ -42,3 +42,12 @@ def health_check():
 @app.get("/version")
 def version_specification():
     return {"version": "1.0.0", "environment": "development"}
+
+
+@app.get("/about")
+def about():
+    return {
+        "name": "DevOps Lab API",
+        "description": "A learning project for DevOps fundamentals",
+        "environment": APP_ENV,
+    }

@@ -42,3 +42,12 @@ def test_version_returns_development():
     response = client.get("/version")
     assert response.status_code == 200
     assert response.json()["environment"] == "development"
+
+
+# TEST 6 : This one has an intentional bug.
+def test_about_endpoint():
+    response = client.get("/about")
+    assert response.status_code == 200
+    # Fixed: the correct key is "name", not "title"
+    assert "name" in response.json()
+    assert response.json()["name"] == "DevOps Lab API"
