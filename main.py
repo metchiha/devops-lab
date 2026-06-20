@@ -1,32 +1,30 @@
 import os
-import sys
+import socket
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-def require_env(name: str) -> str:
-    """Read a required environment variable or exit with a clear error."""
-    value = os.environ.get(name)
-    if not value:
-        print(f"ERROR: Required environment variable '{name}' is not set.")
-        print("Check your .env file or deployment configuration.")
-        sys.exit(1)
-    return value
+APP_ENV = os.environ.get("APP_ENV")
+if not APP_ENV:
+    raise RuntimeError(
+        "APP_ENV environment variable is not set. "
+        "Set it to 'development', 'staging', or 'production'."
+    )
 
-
-# Read configuration at startup — fail fast if required vars are missing
-APP_ENV = require_env("APP_ENV")
-PORT = int(os.environ.get("PORT", "8000"))
-
-# Print config so you can confirm the right values are loaded
-# This appears in your logs — very useful for debugging deployments
-print("Starting DevOps Lab API")
-print(f"  APP_ENV: {APP_ENV}")
-print(f"  PORT:    {PORT}")
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 
 app = FastAPI(title="DevOps Lab API", version="1.0.0")
+
+
+def check_redis_connection() -> bool:
+    """Try to open a TCP connection to Redis. Returns True if reachable."""
+    try:
+        with socket.create_connection((REDIS_HOST, 6379), timeout=1):
+            return True
+    except OSError:
+        return False
 
 
 @app.get("/")
@@ -36,7 +34,15 @@ def root():
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "1.0.0", "environment": APP_ENV}
+    redis_ok = check_redis_connection()
+    if not redis_ok:
+        print(f"WARNING: Cannot reach Redis at {REDIS_HOST}:6379")
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "environment": APP_ENV,
+        "redis": "connected" if redis_ok else "unreachable",
+    }
 
 
 @app.get("/version")
