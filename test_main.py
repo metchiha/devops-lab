@@ -34,7 +34,7 @@ def test_health_check_wrong_assertion():
 def test_version_returns_1_0_0():
     response = client.get("/version")
     assert response.status_code == 200
-    assert response.json()["version"] == "1.0.0"
+    assert response.json()["version"] == "1.0.100"
 
 
 # TEST 5 : This test is correct and should pass.
