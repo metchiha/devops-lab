@@ -47,7 +47,7 @@ def health_check():
 
 @app.get("/version")
 def version_specification():
-    return {"version": "1.0.101", "environment": "development"}
+    return {"version": "1.0.102", "environment": "development"}
 
 
 @app.get("/about")
