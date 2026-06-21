@@ -51,4 +51,3 @@ def test_about_endpoint():
     # Fixed: the correct key is "name", not "title"
     assert "name" in response.json()
     assert response.json()["name"] == "DevOps Lab API"
-
