@@ -19,10 +19,10 @@ jobs:
 
       # uv ruff check runs extremely fast and doesn't necessarily need a full python setup
       - name: Run Linter (Ruff)
-        run: uv ruff check .
+        run: uvx ruff check .
 
       - name: Run Formatter Check (Ruff)
-        run: uv ruff format --check .
+        run: uvx ruff format --check .
   test:
     # Spin up a fresh Ubuntu Linux VM for this job
     runs-on: ubuntu-latest
