@@ -30,6 +30,8 @@ jobs:
         run: uv sync
 
       - name: Run tests
+        env: 
+          APP_ENV: staging
         run: uv run pytest -v
 
       # This step only runs if all previous steps passed.
