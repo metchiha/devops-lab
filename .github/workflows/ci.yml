@@ -37,7 +37,7 @@ jobs:
       - name: Run tests
         run: uv run pytest -v
         env:
-          APP_ENV: test
+          APP_ENV: test 
       
       # This step only runs if all previous steps passed.
       # It also only runs on pushes to main — not on pull requests.
