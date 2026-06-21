@@ -52,7 +52,3 @@ def test_about_endpoint():
     assert "name" in response.json()
     assert response.json()["name"] == "DevOps Lab API"
 
-
-def test_intentionally_broken():
-    response = client.get("/health")
-    assert response.json()["status"] == "this will never match 3"
