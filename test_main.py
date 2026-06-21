@@ -55,4 +55,4 @@ def test_about_endpoint():
 
 def test_intentionally_broken():
     response = client.get("/health")
-    assert response.json()["status"] == "this will never match"
+    assert response.json()["status"] == "this will never match 2"
