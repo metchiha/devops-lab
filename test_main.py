@@ -48,6 +48,6 @@ def test_version_returns_development():
 def test_about_endpoint():
     response = client.get("/about")
     assert response.status_code == 200
-    # Fixed: the correct key is "name", not "title"
+    # Fixed: the correct key is "name", not "title" --
     assert "name" in response.json()
     assert response.json()["name"] == "DevOps Lab API"
