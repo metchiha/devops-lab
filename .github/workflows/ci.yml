@@ -45,5 +45,5 @@ jobs:
       - name: Trigger Coolify deploy
         if: ${{success() && github.ref == 'refs/heads/main' && github.event_name == 'push'}}
         run: |
-          curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_URL }}"
-        
+          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}"
+
