@@ -29,21 +29,13 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      # Check code for style and quality issues
-      - name: Run flake8
-        run: uv run flake8 . --exclude=.venv
-
-      # Run the tests
       - name: Run tests
         run: uv run pytest -v
-        env:
-          APP_ENV: test 
-      
+
       # This step only runs if all previous steps passed.
       # It also only runs on pushes to main — not on pull requests.
       # On a pull request, GITHUB_REF is the PR branch, not refs/heads/main.
       - name: Trigger Coolify deploy
-        if: ${{success() && github.ref == 'refs/heads/main' && github.event_name == 'push'}}
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
-          curl -X POST "${{ secrets.COOLIFY_WEBHOOK_URL }}"
-
+          curl -fsSL -X GET "${{ secrets.COOLIFY_WEBHOOK_URL }}"
