@@ -1,7 +1,7 @@
 import os
 import socket
 import asyncpg
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from dotenv import load_dotenv
 
 load_dotenv()
