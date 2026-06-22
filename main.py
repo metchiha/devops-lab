@@ -44,6 +44,7 @@ def health_check():
         print(f"WARNING: Cannot reach Redis at {REDIS_HOST}:6379")
     return {
         "status": "ok",
+        "heaths": "ok",
         "version": "1.0.0",
         "environment": APP_ENV,
         "redis": "connected" if redis_ok else "unreachable",
@@ -63,6 +64,7 @@ def about():
         "environment": APP_ENV,
     }
 
+
 @app.get("/db-check")
 async def db_check():
     try:
@@ -78,13 +80,9 @@ async def db_check():
         return {
             "status": "ok",
             "database": "connected",
-            "server_version": f"PostgreSQL {server_version}"
+            "server_version": f"PostgreSQL {server_version}",
         }
 
     except Exception as e:
         # Capture the error and return the degraded status response gracefully
-        return {
-            "status": "degraded",
-            "database": "unreachable",
-            "error": str(e)
-        }
+        return {"status": "degraded", "database": "unreachable", "error": str(e)}
