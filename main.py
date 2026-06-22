@@ -1,5 +1,6 @@
 import os
 import socket
+import asyncpg
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
@@ -7,6 +8,10 @@ load_dotenv()
 
 
 APP_ENV = os.environ.get("APP_ENV")
+
+# Retrieve the connection string injected by Docker Compose
+DATABASE_URL = os.getenv("DATABASE_URL")
+
 if not APP_ENV:
     raise RuntimeError(
         "APP_ENV environment variable is not set. "
@@ -57,3 +62,29 @@ def about():
         "description": "A learning project for DevOps fundamentals",
         "environment": APP_ENV,
     }
+
+@app.get("/db-check")
+async def db_check():
+    try:
+        # Establish a quick connection to the database
+        conn = await asyncpg.connect(DATABASE_URL)
+
+        # Run a simple query to fetch the Postgres server version
+        server_version = await conn.fetchval("SHOW server_version;")
+
+        # Always close the connection
+        await conn.close()
+
+        return {
+            "status": "ok",
+            "database": "connected",
+            "server_version": f"PostgreSQL {server_version}"
+        }
+
+    except Exception as e:
+        # Capture the error and return the degraded status response gracefully
+        return {
+            "status": "degraded",
+            "database": "unreachable",
+            "error": str(e)
+        }

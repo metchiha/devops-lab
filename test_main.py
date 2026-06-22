@@ -1,3 +1,4 @@
+from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from main import app
 
@@ -51,3 +52,51 @@ def test_about_endpoint():
     # Fixed: the correct key is "name", not "title" -----------
     assert "name" in response.json()
     assert response.json()["name"] == "DevOps Lab API"
+
+
+# TEST 7 : Test for a successful database connection check. 
+# This test mocks the database connection
+def test_db_check_success():
+    """Test /db-check when the database connection is successful."""
+    # 🌟 Patch asyncpg.connect since that's what main.py imports and uses
+    with patch("main.asyncpg.connect", new_callable=AsyncMock) as mock_connect:
+        # Create asynchronous mocks for the connection object
+        mock_conn = AsyncMock()
+        mock_connect.return_value = mock_conn
+        
+        # mock_conn.fetchval is an async function, so it returns our version string
+        mock_conn.fetchval.return_value = "16.3"
+
+        # Act
+        response = client.get("/db-check")
+
+        # Assert
+        assert response.status_code == 200
+        assert response.json() == {
+            "status": "ok",
+            "database": "connected",
+            "server_version": "PostgreSQL 16.3"
+        }
+        
+        # Verify that connect and close were both awaited properly
+        mock_connect.assert_called_once()
+        mock_conn.close.assert_called_once()
+
+
+# TEST 8 : Test for a failed database connection check.
+def test_db_check_failure():
+    """Test /db-check when the database is unreachable."""
+    with patch("main.asyncpg.connect", new_callable=AsyncMock) as mock_connect:
+        # Force the async connection to raise an exception
+        mock_connect.side_effect = Exception("Connection refused")
+
+        # Act
+        response = client.get("/db-check")
+
+        # Assert
+        assert response.status_code == 200
+        assert response.json() == {
+            "status": "degraded",
+            "database": "unreachable",
+            "error": "Connection refused"
+        }

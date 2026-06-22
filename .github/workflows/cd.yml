@@ -10,6 +10,22 @@ jobs:
     # Spin up a fresh Ubuntu Linux VM for this job
     runs-on: ubuntu-latest
 
+    # 🌟 Added PostgreSQL service container to match the CI environment
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test_user -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -29,6 +45,11 @@ jobs:
       - name: Run tests
         env: 
           APP_ENV: staging
+          # 🌟 Added matching environment configurations so the test runner can locate the service
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          DB_NAME: test_db
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
         run: uv run pytest -v
 
       # This step only runs if all previous steps passed.

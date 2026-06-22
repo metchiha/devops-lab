@@ -1,6 +1,15 @@
+# 1. Leverage the official high-performance uv binary image to grab the executable
+FROM ghcr.io/astral-sh/uv:latest AS uv_bin
 # Start from an official Python image — this is the base layer
 # "3.11-slim" is a minimal version of Python 3.11 (no unnecessary extras)
-FROM python:3.11-slim
+FROM python:3.14-slim
+
+# Copy the uv executable from the official image into our path
+COPY --from=uv_bin /uv /uvx /bin/
+
+# Set environment variables to ensure the virtual environment created by uv is automatically used
+ENV PATH="/app/.venv/bin:$PATH"
+ENV UV_COMPILE_BYTECODE=1
 
 # Set the working directory inside the container
 # All subsequent commands run from this path
@@ -15,7 +24,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 
 # Install uv, then use it to install dependencies
-RUN pip install uv && uv sync --no-dev
+RUN uv sync --frozen --no-dev
 
 # Now copy the rest of your application code
 COPY . .
