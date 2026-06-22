@@ -44,6 +44,7 @@ def health_check():
         print(f"WARNING: Cannot reach Redis at {REDIS_HOST}:6379")
     return {
         "status": "ok",
+        "heaths": "ok",
         "version": "1.0.0",
         "environment": APP_ENV,
         "redis": "connected" if redis_ok else "unreachable",
