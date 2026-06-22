@@ -27,6 +27,23 @@ jobs:
     # Spin up a fresh Ubuntu Linux VM for this job
     runs-on: ubuntu-latest
 
+    # 🌟 Spin up PostgreSQL as a sidecar service container
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        # Ensure PostgreSQL is completely healthy before running our tests
+        options: >-
+          --health-cmd "pg_isready -U test_user -d test_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       # Download your repository code onto the VM
       - name: Check out code
@@ -47,5 +64,11 @@ jobs:
       - name: Run tests
         env: 
           APP_ENV: staging
+          # Provide the database variables required by main.py
+          DB_USER: test_user
+          DB_PASSWORD: test_password
+          DB_NAME: test_db
+          # Since GitHub services bind to 'localhost' on the host runner VM:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
         run: uv run pytest -v
 
