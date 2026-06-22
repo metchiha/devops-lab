@@ -64,6 +64,7 @@ def about():
         "environment": APP_ENV,
     }
 
+
 @app.get("/db-check")
 async def db_check():
     try:
@@ -79,13 +80,9 @@ async def db_check():
         return {
             "status": "ok",
             "database": "connected",
-            "server_version": f"PostgreSQL {server_version}"
+            "server_version": f"PostgreSQL {server_version}",
         }
 
     except Exception as e:
         # Capture the error and return the degraded status response gracefully
-        return {
-            "status": "degraded",
-            "database": "unreachable",
-            "error": str(e)
-        }
+        return {"status": "degraded", "database": "unreachable", "error": str(e)}

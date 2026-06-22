@@ -54,7 +54,7 @@ def test_about_endpoint():
     assert response.json()["name"] == "DevOps Lab API"
 
 
-# TEST 7 : Test for a successful database connection check. 
+# TEST 7 : Test for a successful database connection check.
 # This test mocks the database connection
 def test_db_check_success():
     """Test /db-check when the database connection is successful."""
@@ -63,7 +63,7 @@ def test_db_check_success():
         # Create asynchronous mocks for the connection object
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
-        
+
         # mock_conn.fetchval is an async function, so it returns our version string
         mock_conn.fetchval.return_value = "16.3"
 
@@ -75,9 +75,9 @@ def test_db_check_success():
         assert response.json() == {
             "status": "ok",
             "database": "connected",
-            "server_version": "PostgreSQL 16.3"
+            "server_version": "PostgreSQL 16.3",
         }
-        
+
         # Verify that connect and close were both awaited properly
         mock_connect.assert_called_once()
         mock_conn.close.assert_called_once()
@@ -98,5 +98,5 @@ def test_db_check_failure():
         assert response.json() == {
             "status": "degraded",
             "database": "unreachable",
-            "error": "Connection refused"
+            "error": "Connection refused",
         }
