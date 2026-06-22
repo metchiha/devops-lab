@@ -44,6 +44,17 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        # Ensure Redis is awake and responding before running our tests
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       # Download your repository code onto the VM
       - name: Check out code
@@ -70,5 +81,10 @@ jobs:
           DB_NAME: test_db
           # Since GitHub services bind to 'localhost' on the host runner VM:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+
+          # 🌟 Added Redis environment variables for the test runner
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          REDIS_URL: redis://localhost:6379/0
         run: uv run pytest -v
 
