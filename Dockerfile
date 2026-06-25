@@ -29,9 +29,9 @@ RUN uv sync --frozen --no-dev
 # Now copy the rest of your application code
 COPY . .
 
-# Tell Docker that the container listens on port 8001
+# Tell Docker that the container listens on port 8000
 # This is documentation — it does not actually publish the port
-EXPOSE 8001
+EXPOSE 8000
 
 # The command that runs when the container starts
 CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
