@@ -117,5 +117,3 @@ def test_metrics_endpoint_exists():
     assert response.status_code == 200
     # Prometheus metrics format starts with # HELP
     assert b"# HELP" in response.content
-
-

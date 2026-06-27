@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def require_env(name: str) -> str:
     value = os.environ.get(name)
     if not value:
@@ -23,10 +24,11 @@ def require_env(name: str) -> str:
         sys.exit(1)
     return value
 
+
 APP_ENV = require_env("APP_ENV")
-REDIS_HOST    = os.environ.get("REDIS_HOST", "localhost")
+REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 OTEL_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
-SERVICE_NAME  = os.environ.get("OTEL_SERVICE_NAME", "devops-lab-api")
+SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "devops-lab-api")
 
 print(f"Starting {SERVICE_NAME}")
 print(f"  APP_ENV:       {APP_ENV}")
@@ -65,7 +67,7 @@ logger = logging.getLogger(__name__)
 # Retrieve the connection string injected by Docker Compose
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# ── FastAPI app 
+# ── FastAPI app
 
 app = FastAPI(title="DevOps Lab API", version="1.0.0")
 
@@ -74,6 +76,7 @@ FastAPIInstrumentor.instrument_app(app, tracer_provider=tracer_provider)
 
 # Expose /metrics endpoint for Prometheus to scrape
 Instrumentator().instrument(app).expose(app)
+
 
 # ── Routes
 @app.get("/")
@@ -127,12 +130,13 @@ async def db_check():
         # Capture the error and return the degraded status response gracefully
         logger.error(f"Database check failed: {str(e)}")
         return {"status": "degraded", "database": "unreachable", "error": str(e)}
-    
-    
+
+
 @app.get("/slow")
 def slow_endpoint():
     """A deliberately slow endpoint — useful for seeing latency in Grafana."""
     import time
+
     logger.info("Slow endpoint called — sleeping for 500ms")
     time.sleep(0.5)
     logger.info("Slow endpoint finished")
@@ -144,4 +148,3 @@ def error_endpoint():
     """A deliberately broken endpoint — useful for seeing errors in Grafana."""
     logger.error("Error endpoint called — raising intentional exception")
     raise ValueError("This is an intentional error for observability testing")
-
