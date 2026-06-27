@@ -45,11 +45,10 @@ def test_version_returns_development():
     assert response.json()["environment"] == "development"
 
 
-# TEST 6 : This one has an intentional bug.
+# TEST 6 : This test is correct and should pass.
 def test_about_endpoint():
     response = client.get("/about")
     assert response.status_code == 200
-    # Fixed: the correct key is "name", not "title" -----------
     assert "name" in response.json()
     assert response.json()["name"] == "DevOps Lab API"
 
@@ -100,3 +99,23 @@ def test_db_check_failure():
             "database": "unreachable",
             "error": "Connection refused",
         }
+
+
+def test_slow_endpoint():
+    response = client.get("/slow")
+    assert response.status_code == 200
+    assert response.json()["status"] == "done"
+
+
+def test_error_endpoint_returns_500():
+    response = client.get("/error")
+    assert response.status_code == 500
+
+
+def test_metrics_endpoint_exists():
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    # Prometheus metrics format starts with # HELP
+    assert b"# HELP" in response.content
+
+
