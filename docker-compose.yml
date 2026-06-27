@@ -11,6 +11,11 @@ services:
       - REDIS_HOST=redis
       # Tell your app where PostgreSQL lives using the service name as the host
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - OTEL_SERVICE_NAME=devops-lab-api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://16.54.91.59:4318
+      - OTEL_SAMPLE_RATE=1.0
+      - GRAFANA_ENDPOINT=http://16.54.91.59:3000
+      - INGEST_TELEMETRY=true
     depends_on:
       redis:
         condition: service_healthy
