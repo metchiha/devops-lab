@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from main import app
 
-client = TestClient(app)
+client = TestClient(app, raise_server_exceptions=False)
 
 
 # TEST 1: This test is correct and should PASS
