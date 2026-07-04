@@ -37,20 +37,6 @@ class RegistrationResult(BaseModel):
     message:   str
 
 
-# ── Member registration models ─────────────────────────────────────────────────
-
-class MemberRegistration(BaseModel):
-    name:          str
-    email:         str
-    referral_code: str | None = None
-
-
-class RegistrationResult(BaseModel):
-    status:    str
-    member_id: int | None = None
-    message:   str
-
-
 # ── Validation helpers — each one creates its own span ────────────────────────
 
 # Get a tracer for this module.
