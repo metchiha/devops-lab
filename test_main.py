@@ -119,34 +119,43 @@ def test_metrics_endpoint_exists():
     assert b"# HELP" in response.content
 
 
-
 def test_register_member_missing_last_name():
     """Name validation should reject single-word names."""
-    response = client.post("/members/register", json={
-        "name": "Alice",
-        "email": "alice@example.com",
-    })
+    response = client.post(
+        "/members/register",
+        json={
+            "name": "Alice",
+            "email": "alice@example.com",
+        },
+    )
     assert response.status_code == 422
-    assert "last name" in response.json()["detail"].lower() \
-        or "two words" in response.json()["detail"].lower() \
+    assert (
+        "last name" in response.json()["detail"].lower()
+        or "two words" in response.json()["detail"].lower()
         or "first and last" in response.json()["detail"].lower()
+    )
 
 
 def test_register_member_invalid_email():
     """Email validation should reject malformed addresses."""
-    response = client.post("/members/register", json={
-        "name": "Alice Smith",
-        "email": "not-an-email",
-    })
+    response = client.post(
+        "/members/register",
+        json={
+            "name": "Alice Smith",
+            "email": "not-an-email",
+        },
+    )
     assert response.status_code == 422
     assert "email" in response.json()["detail"].lower()
 
 
 def test_register_member_empty_name():
     """Name validation should reject empty strings."""
-    response = client.post("/members/register", json={
-        "name": "   ",
-        "email": "alice@example.com",
-    })
+    response = client.post(
+        "/members/register",
+        json={
+            "name": "   ",
+            "email": "alice@example.com",
+        },
+    )
     assert response.status_code == 422
-    

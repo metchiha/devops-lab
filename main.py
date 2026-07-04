@@ -25,16 +25,17 @@ load_dotenv()
 
 # ── Member registration models ─────────────────────────────────────────────────
 
+
 class MemberRegistration(BaseModel):
-    name:          str
-    email:         str
+    name: str
+    email: str
     referral_code: str | None = None
 
 
 class RegistrationResult(BaseModel):
-    status:    str
+    status: str
     member_id: int | None = None
-    message:   str
+    message: str
 
 
 # ── Validation helpers — each one creates its own span ────────────────────────
@@ -84,10 +85,12 @@ def validate_email(email: str) -> str:
         span.set_attribute("validation.email_length", len(email))
 
         # Basic format check
-        pattern = r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$'
+        pattern = r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$"
         if not re.match(pattern, email):
             span.set_status(StatusCode.ERROR, "Invalid email format")
-            span.record_exception(ValueError(f"Email does not match expected format: {email}"))
+            span.record_exception(
+                ValueError(f"Email does not match expected format: {email}")
+            )
             raise ValueError(f"Invalid email format: {email}")
 
         domain = email.split("@")[1]
@@ -103,7 +106,6 @@ def validate_email(email: str) -> str:
         span.set_attribute("validation.passed", True)
 
         return email
-
 
 
 def check_email_unique(email: str, conn) -> None:
@@ -124,10 +126,7 @@ def check_email_unique(email: str, conn) -> None:
         span.add_event("db_query_started")
 
         with conn.cursor() as cur:
-            cur.execute(
-                "SELECT COUNT(*) FROM members WHERE email = %s",
-                (email,)
-            )
+            cur.execute("SELECT COUNT(*) FROM members WHERE email = %s", (email,))
             count = cur.fetchone()[0]
 
         span.set_attribute("db.rows_examined", count)
@@ -163,8 +162,7 @@ def validate_referral(referral_code: str | None, conn) -> int | None:
 
         with conn.cursor() as cur:
             cur.execute(
-                "SELECT id FROM members WHERE referral_code = %s",
-                (referral_code,)
+                "SELECT id FROM members WHERE referral_code = %s", (referral_code,)
             )
             row = cur.fetchone()
 
@@ -202,7 +200,7 @@ def insert_member(name: str, email: str, referring_id: int | None, conn) -> int:
                 VALUES (%s, %s, %s, NOW())
                 RETURNING id
                 """,
-                (name, email, referring_id)
+                (name, email, referring_id),
             )
             member_id = cur.fetchone()[0]
         conn.commit()
@@ -211,7 +209,7 @@ def insert_member(name: str, email: str, referring_id: int | None, conn) -> int:
         span.add_event("insert_completed", {"member_id": member_id})
 
         return member_id
-    
+
 
 def get_db_connection():
     """
@@ -221,7 +219,7 @@ def get_db_connection():
     if not DATABASE_URL:
         logger.error("DATABASE_URL environment variable is missing!")
         raise ValueError("DATABASE_URL is not set.")
-    
+
     # Connects to the database using the URL injected from docker-compose
     return psycopg2.connect(DATABASE_URL)
 
@@ -361,6 +359,7 @@ def error_endpoint():
 
 # ── POST /members/register ─────────────────────────────────────────────────────
 
+
 @app.post("/members/register", status_code=201)
 def register_member(payload: MemberRegistration):
     """
@@ -399,9 +398,13 @@ def register_member(payload: MemberRegistration):
         logger.warning(f"Registration rejected: {e}")
         # FastAPI will convert this to a 422 response
         from fastapi import HTTPException
+
         raise HTTPException(status_code=422, detail=str(e))
 
     except Exception as e:
         logger.error(f"Registration failed unexpectedly: {e}")
         from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail="Internal error during registration")
+
+        raise HTTPException(
+            status_code=500, detail="Internal error during registration"
+        )
