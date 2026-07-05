@@ -57,8 +57,10 @@ def test_about_endpoint():
 # This test mocks the database connection
 def test_db_check_success():
     """Test /db-check when the database connection is successful."""
-    # 🌟 Patch asyncpg.connect since that's what main.py imports and uses
-    with patch("main.asyncpg.connect", new_callable=AsyncMock) as mock_connect:
+    # 🌟 Patch asyncpg.connect since that's what routers/db_check.py imports and uses
+    with patch(
+        "routers.db_check.asyncpg.connect", new_callable=AsyncMock
+    ) as mock_connect:
         # Create asynchronous mocks for the connection object
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
@@ -85,7 +87,9 @@ def test_db_check_success():
 # TEST 8 : Test for a failed database connection check.
 def test_db_check_failure():
     """Test /db-check when the database is unreachable."""
-    with patch("main.asyncpg.connect", new_callable=AsyncMock) as mock_connect:
+    with patch(
+        "routers.db_check.asyncpg.connect", new_callable=AsyncMock
+    ) as mock_connect:
         # Force the async connection to raise an exception
         mock_connect.side_effect = Exception("Connection refused")
 
