@@ -14,7 +14,6 @@ router = APIRouter()
 async def db_check():
     logger.info("Database check requested")
     try:
-
         conn = await asyncpg.connect(DATABASE_URL)
 
         server_version = await conn.fetchval("SHOW server_version;")
