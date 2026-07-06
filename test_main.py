@@ -123,6 +123,38 @@ def test_metrics_endpoint_exists():
     assert b"# HELP" in response.content
 
 
+def _health_check_counter_value():
+    """Read the current value of health_check_requests_total from /metrics."""
+    metrics = client.get("/metrics").text
+    for line in metrics.splitlines():
+        if line.startswith("health_check_requests_total "):
+            return float(line.split()[-1])
+    return None
+
+
+def test_metrics_contains_health_check_counter():
+    """The custom counter should be exposed with the expected name and HELP text."""
+    response = client.get("/metrics")
+    assert response.status_code == 200
+    assert (
+        b"# HELP health_check_requests_total Total number of times /health "
+        b"has been called since the last restart" in response.content
+    )
+    assert b"# TYPE health_check_requests_total counter" in response.content
+
+
+def test_health_check_counter_increments_on_each_call():
+    """Each /health request should increment health_check_requests_total by 1."""
+    before = _health_check_counter_value()
+    assert before is not None
+
+    client.get("/health")
+    client.get("/health")
+
+    after = _health_check_counter_value()
+    assert after == before + 2
+
+
 def test_register_member_missing_last_name():
     """Name validation should reject single-word names."""
     response = client.post(

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from prometheus_client import Counter
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from config import APP_ENV, OTEL_ENDPOINT, REDIS_HOST, SERVICE_NAME
@@ -21,6 +22,19 @@ instrument_app(app, tracer_provider)
 
 # Expose /metrics endpoint for Prometheus to scrape
 Instrumentator().instrument(app).expose(app)
+
+health_check_counter = Counter(
+    "health_check_requests_total",
+    "Total number of times /health has been called since the last restart",
+)
+
+
+@app.middleware("http")
+async def count_health_checks(request, call_next):
+    if request.url.path == "/health":
+        health_check_counter.inc()
+    return await call_next(request)
+
 
 app.include_router(general.router)
 app.include_router(db_check.router)
