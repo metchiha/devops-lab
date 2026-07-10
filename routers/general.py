@@ -1,6 +1,5 @@
 import logging
 import time
-import random
 
 from fastapi import APIRouter
 
@@ -45,9 +44,6 @@ def slow_endpoint():
     logger.info("Slow endpoint called — sleeping for 500ms")
     time.sleep(0.5)
     logger.info("Slow endpoint finished")
-    if random.random() < 0.3:
-        time.sleep(3.0)
-        logger.warning("Slow endpoint: 3s delay due to simulated resource contention")
     return {"status": "done", "note": "This endpoint is intentionally slow"}
 
 
