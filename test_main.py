@@ -76,7 +76,8 @@ def test_db_check_success():
         assert response.json() == {
             "status": "ok",
             "database": "connected",
-            "server_version": "PostgreSQL 16.3",
+            "server_version": "16.3",
+            "tables": [],
         }
 
         # Verify that connect and close were both awaited properly

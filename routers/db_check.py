@@ -21,25 +21,24 @@ router = APIRouter()
 INGEST_TELEMETRY = os.environ.get("INGEST_TELEMETRY", "false").lower() == "true"
 
 
-def _get_table_names(conn) -> list[str]:
+async def _get_table_names(conn) -> list[str]:
     """Return all user-created table names in the public schema."""
-    with conn.cursor() as cur:
-        cur.execute("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-              AND table_type = 'BASE TABLE'
-            ORDER BY table_name
-        """)
-        return [row[0] for row in cur.fetchall()]
+    rows = await conn.fetch("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+    """)
+    return [row["table_name"] for row in rows]
 
 
-def _get_table_health_fast(conn) -> list[dict]:
+async def _get_table_health_fast(conn) -> list[dict]:
     """
     Get row counts for all tables in a single query.
     This is the correct approach.
     """
-    tables = _get_table_names(conn)
+    tables = await _get_table_names(conn)
     if not tables:
         return []
 
@@ -47,12 +46,11 @@ def _get_table_health_fast(conn) -> list[dict]:
     parts = " UNION ALL ".join(
         f"SELECT '{t}' AS table_name, COUNT(*) AS row_count FROM {t}" for t in tables
     )
-    with conn.cursor() as cur:
-        cur.execute(parts)
-        return [{"table": row[0], "rows": row[1]} for row in cur.fetchall()]
+    rows = await conn.fetch(parts)
+    return [{"table": row["table_name"], "rows": row["row_count"]} for row in rows]
 
 
-def _get_table_health_slow(conn) -> list[dict]:
+async def _get_table_health_slow(conn) -> list[dict]:
     """
     Get row counts by querying each table individually in a loop.
 
@@ -61,14 +59,12 @@ def _get_table_health_slow(conn) -> list[dict]:
     jitter added, this becomes very visible in traces.
     This function is only called when INGEST_TELEMETRY=true.
     """
-    tables = _get_table_names(conn)
+    tables = await _get_table_names(conn)
     results = []
     for table in tables:
         # Simulate real-world lock contention / query planner jitter
         time.sleep(random.uniform(0.05, 0.15))
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT COUNT(*) FROM {table}")
-            count = cur.fetchone()[0]
+        count = await conn.fetchval(f"SELECT COUNT(*) FROM {table}")
         results.append({"table": table, "rows": count})
     return results
 
@@ -89,12 +85,24 @@ async def db_check():
                 span.set_status(StatusCode.ERROR, str(e))
                 raise
 
+        # Gather table health data
+        # When INGEST_TELEMETRY is enabled, use the extended collection path
+        # to gather richer telemetry data per table.
+        if INGEST_TELEMETRY and random.random() < 0.3:
+            logger.info("Running extended telemetry collection for db-check")
+            table_health = await _get_table_health_slow(conn)
+        else:
+            table_health = await _get_table_health_fast(conn)
+
         await conn.close()
+
+        logger.info(f"db-check completed, found {len(table_health)} tables")
 
         return {
             "status": "ok",
             "database": "connected",
-            "server_version": f"PostgreSQL {server_version}",
+            "server_version": server_version,
+            "tables": table_health,
         }
 
     except Exception as e:
