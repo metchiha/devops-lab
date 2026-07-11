@@ -45,15 +45,11 @@ def _get_table_health_fast(conn) -> list[dict]:
 
     # Build one query that counts all tables at once using UNION ALL
     parts = " UNION ALL ".join(
-        f"SELECT '{t}' AS table_name, COUNT(*) AS row_count FROM {t}"
-        for t in tables
+        f"SELECT '{t}' AS table_name, COUNT(*) AS row_count FROM {t}" for t in tables
     )
     with conn.cursor() as cur:
         cur.execute(parts)
-        return [
-            {"table": row[0], "rows": row[1]}
-            for row in cur.fetchall()
-        ]
+        return [{"table": row[0], "rows": row[1]} for row in cur.fetchall()]
 
 
 def _get_table_health_slow(conn) -> list[dict]:
