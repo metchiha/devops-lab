@@ -1,7 +1,6 @@
 import logging
 import os
 import random
-import socket
 import time
 import asyncpg
 from fastapi import APIRouter
