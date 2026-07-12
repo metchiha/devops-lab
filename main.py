@@ -20,8 +20,12 @@ app = FastAPI(title="DevOps Lab API", version="1.0.0")
 # Auto-instrument FastAPI — creates a span for every request
 instrument_app(app, tracer_provider)
 
-# Expose /metrics endpoint for Prometheus to scrape
-Instrumentator().instrument(app).expose(app)
+# Expose /metrics endpoint for Prometheus to scrape.
+# Default latency_lowr_buckets is (0.1, 0.5, 1) — too coarse for /slow, which
+# can take up to ~3.5s, so most of its requests land in the +Inf bucket.
+Instrumentator().instrument(
+    app, latency_lowr_buckets=(0.1, 0.5, 1, 2, 3, 4, 5, 10)
+).expose(app)
 
 health_check_counter = Counter(
     "health_check_requests_total",
